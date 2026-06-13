@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="Pokémon GAUNTLET — play in Claude Code" width="100%">
+</p>
+
 # ⚔ GAUNTLET
 
 **Pokémon, refereed by Claude Code.** A complete Pokémon battle engine you play *inside* a Claude Code session. Every stat, move, sprite, and catch rate is pulled live from [PokeAPI](https://pokeapi.co). Zero dependencies — just Node 18+.
