@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GAUNTLET — journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@400;500;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#0C1014; --panel:#131920; --panel-2:#182027; --line:#232E38; --line-2:#2E3A46;
+  --text:#E9EEF3; --dim:#7C8893; --faint:#4C5660;
+  --accent:#A8A77A; --accent-soft:rgba(168,167,122,.13);
+  --danger:#E5484D; --ok:#46A758; --warn:#D8A03D;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:"JetBrains Mono",monospace;font-size:13.5px;line-height:1.55;overflow:hidden}
+.silk{font-family:"Silkscreen",monospace;text-transform:uppercase}
+.tale-voice{font-family:"Crimson Pro",serif;font-size:17px;line-height:1.6}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button[disabled]{opacity:.35;pointer-events:none}
+img.px{image-rendering:pixelated}
+input[type=text],input[type=password]{
+  background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+  font-family:"JetBrains Mono",monospace;font-size:13px;padding:9px 12px;width:100%;
+}
+::selection{background:var(--accent);color:#0C1014}
+.eyebrow{font-size:10px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase}
+.tag{display:inline-block;font-size:9px;letter-spacing:.13em;padding:1px 7px;border:1px solid currentColor;text-transform:uppercase;line-height:1.7}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.shake{animation:shake .42s ease}
+@keyframes faintdrop{to{opacity:0;transform:translateY(26px)}}
+.faintdrop{animation:faintdrop .5s ease forwards}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fadein{animation:fadein .3s ease both}
+@keyframes stampin{0%{opacity:0;transform:translate(-50%,-50%) scale(1.5) rotate(-4deg)}60%{opacity:1;transform:translate(-50%,-50%) scale(.97) rotate(-4deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-4deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.thinking{animation:pulse 1.2s ease infinite}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+
+/* ---- app frame ---- */
+#app{height:100dvh;display:grid;grid-template-rows:auto 1fr auto;max-width:1280px;margin:0 auto;padding:0 18px}
+header{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line);padding:12px 2px}
+header .logo{font-size:15px;font-weight:700;letter-spacing:.13em;color:var(--accent)}
+header .crumb{color:var(--faint);font-size:10px;letter-spacing:.1em}
+#card-strip{margin-left:auto;display:flex;gap:16px;font-size:11px;color:var(--dim);letter-spacing:.04em;flex-wrap:wrap}
+#card-strip b{color:var(--text);font-weight:500}
+#main{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;min-height:0;padding:14px 0}
+.pane{background:var(--panel);border:1px solid var(--line);min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.pane-h{display:flex;align-items:baseline;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);flex:none}
+.pane-h .t{font-size:10px;letter-spacing:.2em;color:var(--dim)}
+.pane-h .r{margin-left:auto;font-size:10px;color:var(--faint)}
+
+/* ---- stage ---- */
+#stage{flex:1;position:relative;overflow:auto;background:radial-gradient(700px 300px at 72% 14%,var(--accent-soft),transparent 70%)}
+.stage-inner{position:relative;min-height:100%;padding:18px}
+.combatant{display:flex;flex-direction:column;gap:8px}
+.combatant.enemy{align-items:flex-end;margin-left:auto;width:fit-content}
+.combatant.player{align-items:flex-start;width:fit-content;margin-top:-26px}
+.plate{background:rgba(12,16,20,.88);border:1px solid var(--line-2);padding:9px 12px;min-width:240px}
+.plate .nm{display:flex;align-items:baseline;gap:8px}
+.plate .nm b{font-size:12px;letter-spacing:.09em}
+.plate .nm .lv{color:var(--dim);font-size:10px;margin-left:auto}
+.hpbar{height:8px;background:#0a0d11;border:1px solid var(--line-2);position:relative;overflow:hidden;flex:1}
+.hpbar i{position:absolute;inset:0;transform-origin:left;background:var(--ok);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.hpbar.low i{background:var(--warn)} .hpbar.crit i{background:var(--danger)}
+.hp-row{display:flex;align-items:center;gap:8px;margin-top:7px}
+.hp-num{font-size:10px;color:var(--dim);min-width:70px;text-align:right}
+.sprite{position:relative;width:fit-content}
+.sprite img{width:200px;height:200px;object-fit:contain;filter:drop-shadow(0 16px 18px rgba(0,0,0,.55))}
+.combatant.player .sprite img{width:230px;height:230px}
+.sprite::after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:72%;height:16px;border-radius:50%;background:rgba(0,0,0,.45);filter:blur(4px);z-index:-1}
+.battle-flag{position:absolute;top:12px;left:16px;font-size:10px;letter-spacing:.22em;color:var(--dim)}
+.battle-flag b{color:var(--text)}
+.stamp{position:absolute;left:50%;top:44%;font-size:19px;letter-spacing:.16em;padding:7px 16px;border:2px solid currentColor;background:rgba(12,16,20,.9);animation:stampin .4s ease both;pointer-events:none;white-space:nowrap;z-index:5}
+.stamp.super{color:var(--warn)} .stamp.weak{color:var(--dim)} .stamp.crit{color:var(--danger)} .stamp.immune{color:var(--faint)}
+
+/* trainer card / pick views inside stage */
+.tc{padding:24px}
+.tc h2{font-size:18px;letter-spacing:.08em;margin-bottom:4px}
+.tc .sub{color:var(--dim);font-size:12px;margin-bottom:18px}
+.tc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.mon-card{background:var(--panel-2);border:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:7px;text-align:left;transition:border-color .15s ease,transform .07s ease}
+.mon-card:hover{border-color:var(--accent)}
+.mon-card:active{transform:translateY(1px)}
+.mon-card img{width:84px;height:84px;align-self:center}
+.mon-card .nm{font-size:11px;letter-spacing:.08em;font-weight:700}
+.mon-card .meta{font-size:10px;color:var(--dim)}
+.mon-card .types{display:flex;gap:5px}
+.mon-card .mini-hp{display:flex;align-items:center;gap:6px}
+.mon-card .mini-hp .hp-num{min-width:0}
+.world-block{margin-top:18px;border:1px solid var(--warn);background:rgba(216,160,61,.07);padding:12px 14px}
+.world-block .wt{color:var(--warn);font-size:10px;letter-spacing:.2em;margin-bottom:6px}
+.world-block p{font-size:12px;color:var(--text);margin:3px 0}
+.world-block p b{color:var(--warn)}
+
+/* ---- tale ---- */
+#tale{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.gm-msg{color:var(--text)}
+.gm-msg .who{font-size:9px;letter-spacing:.24em;color:var(--accent);font-family:"Silkscreen",monospace;text-transform:uppercase;display:block;margin-bottom:4px}
+.engine-msg{font-size:11.5px;color:var(--dim);border-left:2px solid var(--line);padding-left:10px}
+.engine-msg.hot{color:var(--text);border-left-color:var(--accent)}
+.player-msg{color:var(--dim);font-size:12.5px;text-align:right}
+.player-msg em{color:var(--text);font-style:normal}
+.conseq-msg{border:1px solid var(--warn);padding:9px 12px;font-size:12px;color:var(--warn)}
+
+/* ---- action bar ---- */
+#actions{border-top:1px solid var(--line);padding:12px 0 16px;display:flex;flex-direction:column;gap:10px}
+#btn-row{display:flex;gap:8px;flex-wrap:wrap;min-height:38px}
+.act{background:var(--panel);border:1px solid var(--line);padding:8px 14px;font-size:11.5px;letter-spacing:.04em;transition:border-color .12s,background .12s,transform .06s}
+.act:hover{border-color:var(--line-2);background:var(--panel-2)}
+.act:active{transform:translateY(1px)}
+.act.move{border-left:3px solid var(--mv,#888);text-align:left;min-width:150px}
+.act.move .mn{font-weight:700;display:block;font-size:11px}
+.act.move .mi{font-size:10px;color:var(--dim);display:flex;gap:10px;margin-top:2px}
+.act.primary{background:var(--accent);color:#0C1014;border-color:var(--accent);font-weight:700;letter-spacing:.1em}
+.act.primary:hover{filter:brightness(1.1)}
+.act.ghost{color:var(--dim)}
+.act.suggest{border-style:dashed;color:var(--dim);font-family:"Crimson Pro",serif;font-size:14px;letter-spacing:0}
+.act.suggest:hover{color:var(--text)}
+#say-row{display:flex;gap:8px}
+#say{flex:1}
+#setup{position:fixed;inset:0;background:var(--bg);z-index:40;display:flex;align-items:center;justify-content:center;padding:20px}
+.setup-box{max-width:520px;width:100%}
+.setup-box h1{font-size:clamp(30px,5vw,44px);letter-spacing:.02em;line-height:1}
+.setup-box h1 span{color:var(--accent)}
+.setup-box .lede{color:var(--dim);margin:14px 0 26px;font-size:13px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:10px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+.field .note{font-size:10.5px;color:var(--faint);margin-top:5px}
+.check{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--dim);margin:4px 0 18px}
+#err{color:var(--danger);font-size:12px;margin-top:12px;min-height:16px}
+@media (max-width: 920px){
+  #main{grid-template-columns:1fr;grid-template-rows:minmax(300px,1.1fr) minmax(180px,1fr)}
+  .sprite img{width:130px;height:130px}
+  .combatant.player .sprite img{width:150px;height:150px}
+  .plate{min-width:185px}
+  body{overflow:auto}
+  #app{height:auto;min-height:100dvh}
+}
+.tool-msg{font-size:10.5px;color:var(--faint);font-family:"JetBrains Mono",monospace}
+.tool-msg::before{content:"⚙ "}
+</style>
+</head>
+<body>
+<div id="setup">
+  <div class="setup-box">
+    <h1 class="silk">THE TALL<br>GRASS <span>TALKS</span></h1>
+    <p class="lede">A Pokémon journey with Claude Code as the Game Master. The engine on disk runs every battle, catch, and coin; the GM agent acts on the same state with its own hands. World data and sprites live on PokeAPI.</p>
+    <div class="field">
+      <label for="tn">Trainer name</label>
+      <input type="text" id="tn" placeholder="Red" maxlength="20" autocomplete="off" />
+    </div>
+    <button class="act primary silk" id="begin">NEW JOURNEY</button>
+    <button class="act ghost" id="resume" style="display:none">RESUME JOURNEY</button>
+    <p id="gm-probe" class="lede" style="margin-top:16px;font-size:11px"></p>
+    <p id="err"></p>
+  </div>
+</div>
+
+<div id="app" style="visibility:hidden">
+  <header>
+    <span class="silk logo">GAUNTLET</span>
+    <span class="crumb silk">journey</span>
+    <div id="card-strip"></div>
+  </header>
+  <div id="main">
+    <div class="pane">
+      <div class="pane-h"><span class="t silk">STAGE</span><span class="r" id="stage-flag"></span></div>
+      <div id="stage"><div class="stage-inner" id="stage-inner"></div></div>
+    </div>
+    <div class="pane">
+      <div class="pane-h"><span class="t silk">THE TALE</span><span class="r" id="gm-status"></span></div>
+      <div id="tale"></div>
+    </div>
+  </div>
+  <div id="actions">
+    <div id="btn-row"></div>
+    <div id="say-row">
+      <input type="text" id="say" placeholder="Say or do anything — the GM is listening…" autocomplete="off" />
+      <button class="act" id="say-btn">SEND</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* GAUNTLET web client — renderer + controller for the on-disk engine.
+   All mechanics: POST /cmd → node game.js. All story: POST /gm → claude -p. */
+
+const TYPE_COLORS = {
+  normal:"#A8A77A", fire:"#EE8130", water:"#6390F0", electric:"#F7D02C",
+  grass:"#7AC74C", ice:"#96D9D6", fighting:"#C22E28", poison:"#A33EA1",
+  ground:"#E2BF65", flying:"#A98FF3", psychic:"#F95587", bug:"#A6B91A",
+  rock:"#B6A136", ghost:"#735797", dragon:"#6F35FC", dark:"#9A7B63",
+  steel:"#B7B7CE", fairy:"#D685AD",
+};
+const TYPE_CHART = {
+  normal:{rock:.5,ghost:0,steel:.5},
+  fire:{fire:.5,water:.5,grass:2,ice:2,bug:2,rock:.5,dragon:.5,steel:2},
+  water:{fire:2,water:.5,grass:.5,ground:2,rock:2,dragon:.5},
+  electric:{water:2,electric:.5,grass:.5,ground:0,flying:2,dragon:.5},
+  grass:{fire:.5,water:2,grass:.5,poison:.5,ground:2,flying:.5,bug:.5,rock:2,dragon:.5,steel:.5},
+  ice:{fire:.5,water:.5,grass:2,ice:.5,ground:2,flying:2,dragon:2,steel:.5},
+  fighting:{normal:2,ice:2,poison:.5,flying:.5,psychic:.5,bug:.5,rock:2,ghost:0,dark:2,steel:2,fairy:.5},
+  poison:{grass:2,poison:.5,ground:.5,rock:.5,ghost:.5,steel:0,fairy:2},
+  ground:{fire:2,electric:2,grass:.5,poison:2,flying:0,bug:.5,rock:2,steel:2},
+  flying:{electric:.5,grass:2,fighting:2,bug:2,rock:.5,steel:.5},
+  psychic:{fighting:2,poison:2,psychic:.5,dark:0,steel:.5},
+  bug:{fire:.5,grass:2,fighting:.5,poison:.5,flying:.5,psychic:2,ghost:.5,dark:2,steel:.5,fairy:.5},
+  rock:{fire:2,ice:2,fighting:.5,ground:.5,flying:2,bug:2,steel:.5},
+  ghost:{normal:0,psychic:2,ghost:2,dark:.5},
+  dragon:{dragon:2,steel:.5,fairy:0},
+  dark:{fighting:.5,psychic:2,ghost:2,dark:.5,fairy:.5},
+  steel:{fire:.5,water:.5,electric:.5,ice:2,rock:2,steel:.5,fairy:2},
+  fairy:{fire:.5,fighting:2,poison:.5,dragon:2,dark:2,steel:.5},
+};
+const eff = (t, dts) => dts.reduce((m,d)=>m*(TYPE_CHART[t]?.[d] ?? 1), 1);
+
+const $ = (s,r=document)=>r.querySelector(s);
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const cap = s => String(s).split("-").map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+const escHtml = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const stripAnsi = s => String(s).replace(/\x1b\[[0-9;]*m/g, "");
+
+let FULL = null;          // last /state payload
+let CAMP = null;          // FULL.state.camp
+let busy = false;
+let logSeen = 0;          // battle log entries already shown
+let lastBattleKey = null;
+
+const camp = () => CAMP;
+const active = () => CAMP.party[CAMP.activeIdx];
+
+/* ---------------- net ---------------- */
+
+async function refresh(){
+  FULL = await (await fetch("/state")).json();
+  CAMP = FULL.state?.camp || null;
+  return FULL;
+}
+
+async function cmd(verb, ...args){
+  const res = await fetch("/cmd", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ verb, args }),
+  });
+  const data = await res.json();
+  FULL = data; CAMP = data.state?.camp || null;
+  return data;
+}
+
+/* ---------------- tale ---------------- */
+
+const tale = () => $("#tale");
+const taleScroll = () => { tale().scrollTop = tale().scrollHeight; };
+function taleGM(t){ tale().insertAdjacentHTML("beforeend", `<div class="gm-msg tale-voice fadein"><span class="who">game master</span>${escHtml(t)}</div>`); taleScroll(); }
+function taleEngine(t, hot){ tale().insertAdjacentHTML("beforeend", `<div class="engine-msg ${hot?"hot":""}">${escHtml(t)}</div>`); taleScroll(); }
+function talePlayer(t){ tale().insertAdjacentHTML("beforeend", `<div class="player-msg fadein"><em>${escHtml(t)}</em></div>`); taleScroll(); }
+function taleConseq(t){ tale().insertAdjacentHTML("beforeend", `<div class="conseq-msg fadein">⚠ ${escHtml(t)}</div>`); taleScroll(); }
+function taleTool(t){ tale().insertAdjacentHTML("beforeend", `<div class="tool-msg">${escHtml(t)}</div>`); taleScroll(); }
+function setGMStatus(t, b){ const el=$("#gm-status"); el.textContent=t||""; el.className="r"+(b?" thinking":""); }
+
+/* battle log: show only new entries; on battle end, surface the frame tail */
+function drainBattleLog(){
+  const b = CAMP?.battle;
+  if (!b){ logSeen = 0; lastBattleKey = null; return; }
+  const key = b.kind + ":" + (b.foe?.name||"") + ":" + (CAMP.counters?.battles||0);
+  if (key !== lastBattleKey){ lastBattleKey = key; logSeen = 0; }
+  const log = b.log || [];
+  for (let i = logSeen; i < log.length; i++){
+    const t = stripAnsi(log[i]);
+    taleEngine(t, /fainted|Victory|super effective|Critical|grew to|Gotcha/i.test(t));
+  }
+  logSeen = log.length;
+}
+function drainOutputTail(output){
+  // out-of-battle engine messages live in the frame's LOG tail
+  for (const line of String(output).split("\n")){
+    const m = line.match(/^\s*> (.*)$/);
+    if (m) taleEngine(stripAnsi(m[1]), /blacked out|Gotcha|Victory/i.test(m[1]));
+  }
+}
+
+/* ---------------- GM beat (streamed) ---------------- */
+
+async function gmBeat(text, events){
+  if (!FULL?.gm?.available){ return; }
+  setGMStatus("the GM is thinking…", true);
+  try {
+    const res = await fetch("/gm", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ text, events }),
+    });
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = "";
+    while (true){
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream:true });
+      let nl;
+      while ((nl = buf.indexOf("\n")) >= 0){
+        const line = buf.slice(0, nl).trim(); buf = buf.slice(nl+1);
+        if (!line) continue;
+        let ev; try { ev = JSON.parse(line); } catch(e){ continue; }
+        if (ev.type === "tool") taleTool(ev.text);
+        if (ev.type === "narration") taleGM(ev.text);
+        if (ev.type === "error") taleEngine(ev.message);
+      }
+    }
+  } catch(e){ taleEngine("GM stream failed: " + e.message); }
+  setGMStatus("");
+  await refresh();          // the GM may have started battles, staged events, journaled
+  drainBattleLog();
+  renderAll();
+}
+
+/* ---------------- render ---------------- */
+
+function setAccent(){
+  const t = CAMP?.party?.length ? active().types[0] : "normal";
+  const c = TYPE_COLORS[t] || TYPE_COLORS.normal;
+  document.documentElement.style.setProperty("--accent", c);
+  document.documentElement.style.setProperty("--accent-soft", c+"22");
+}
+const hpbarHTML = m => {
+  const pct = Math.max(0, m.hp/m.stats.maxhp);
+  return `<div class="hpbar ${pct<=.2?"crit":pct<=.5?"low":""}"><i style="transform:scaleX(${pct})"></i></div>`;
+};
+const typeTags = ts => ts.map(t=>`<span class="tag" style="color:${TYPE_COLORS[t]}">${t}</span>`).join("");
+const plateHTML = m => `<div class="plate">
+  <div class="nm"><b class="silk">${m.name}</b>${typeTags(m.types)}<span class="lv">Lv.${m.level}</span></div>
+  <div class="hp-row">${hpbarHTML(m)}<span class="hp-num">${Math.max(0,m.hp)}/${m.stats.maxhp}</span></div></div>`;
+
+function conseqDue(){
+  if (!CAMP) return [];
+  const c = CAMP.counters || {battles:0,sessions:0};
+  const q = FULL.memory?.consequences || {};
+  return Object.entries(q).filter(([k,v]) =>
+    (v.at_location && v.at_location === CAMP.location) ||
+    (v.after_battles != null && c.battles - (v.base?.battles??0) >= v.after_battles) ||
+    (v.after_sessions != null && c.sessions - (v.base?.sessions??0) >= v.after_sessions));
+}
+
+function renderCardStrip(){
+  if (!CAMP){ $("#card-strip").innerHTML=""; return; }
+  const t = CAMP.trainer;
+  $("#card-strip").innerHTML =
+    `<span><b>${escHtml(t.name)}</b></span><span>₽<b>${t.money}</b></span>`+
+    `<span>balls <b>${t.balls.pokeball}/${t.balls.greatball}/${t.balls.ultraball}</b></span>`+
+    `<span>potions <b>${t.potions}</b></span>`+
+    `<span>@ <b>${CAMP.location || "—"}</b></span><span class="silk" style="font-size:9px">S${CAMP.counters?.sessions||1}</span>`;
+}
+
+function renderStage(){
+  const inner = $("#stage-inner");
+  $("#stage-flag").textContent = "";
+  if (!CAMP){ inner.innerHTML = ""; return; }
+  if (CAMP.draft){
+    inner.innerHTML = `<div class="tc fadein">
+      <p class="eyebrow">first light</p><h2 class="silk">Choose your partner</h2>
+      <p class="sub">Three from the professor's case. The other two go to trainers you'll meet again.</p>
+      <div class="tc-grid">${CAMP.draft.map((m,i)=>`
+        <button class="mon-card" data-pick="${i}">
+          <img class="px" src="${m.spriteUrl}" alt="${m.name}">
+          <span class="nm silk">${m.name}</span>
+          <span class="types">${typeTags(m.types)}</span>
+          <span class="meta">${m.moves.map(mv=>cap(mv.name)).join(" · ")}</span>
+        </button>`).join("")}</div></div>`;
+    inner.querySelectorAll("[data-pick]").forEach(el=>el.addEventListener("click",()=>pickStarter(+el.dataset.pick)));
+    return;
+  }
+  if (CAMP.battle){
+    const b = CAMP.battle, me = active();
+    $("#stage-flag").textContent = b.kind==="trainer" ? `trainer ${b.name} · ${b.queue.length} in reserve` : "wild encounter";
+    inner.innerHTML = `
+      <div class="battle-flag silk">${b.kind==="trainer" ? "VS <b>"+escHtml(String(b.name)).toUpperCase()+"</b>" : "WILD <b>"+b.foe.name.toUpperCase()+"</b>"}</div>
+      <div class="combatant enemy">${plateHTML(b.foe)}
+        <div class="sprite" id="foe-sprite"><img class="px" src="${b.foe.spriteUrl}" alt="${b.foe.name}"></div></div>
+      <div class="combatant player">
+        <div class="sprite" id="me-sprite"><img class="px" src="${me.backSprite || me.spriteUrl}" alt="${me.name}"></div>
+        ${plateHTML(me)}</div>`;
+    return;
+  }
+  const due = conseqDue();
+  inner.innerHTML = `<div class="tc fadein">
+    <p class="eyebrow">${CAMP.location ? escHtml(CAMP.location) : "the journey"}</p>
+    <h2 class="silk">${escHtml(CAMP.trainer.name)}'s party</h2>
+    <p class="sub">₽${CAMP.trainer.money} · box ${CAMP.box.length} · ${CAMP.counters?.battles||0} battles fought</p>
+    <div class="tc-grid">${CAMP.party.map((m,i)=>`
+      <button class="mon-card" data-active="${i}" style="${i===CAMP.activeIdx?"border-color:var(--accent)":""}">
+        <img class="px" src="${m.spriteUrl}" alt="${m.name}" style="${m.hp<=0?"filter:grayscale(1) brightness(.6)":""}">
+        <span class="nm silk">${m.name}</span>
+        <span class="meta">Lv.${m.level}${m.hp<=0?" · FAINTED":""}</span>
+        <span class="mini-hp">${hpbarHTML(m)}<span class="hp-num">${Math.max(0,m.hp)}/${m.stats.maxhp}</span></span>
+      </button>`).join("")}</div>
+    ${due.length ? `<div class="world-block"><div class="wt silk">THE WORLD STIRS</div>${
+      due.map(([k,v])=>`<p><b>${escHtml(k)}</b> — ${escHtml(v.what||"")}</p>`).join("")}</div>` : ""}
+  </div>`;
+  inner.querySelectorAll("[data-active]").forEach(el=>el.addEventListener("click",()=>{
+    // active slot is engine state; use party swap to bring choice to slot of current active? Keep simple: switch happens in battle.
+  }));
+}
+
+function actBtn(label, fn, cls=""){
+  const b = document.createElement("button");
+  b.className = "act "+cls; b.innerHTML = label;
+  b.addEventListener("click", fn);
+  return b;
+}
+
+function renderActions(){
+  const row = $("#btn-row"); row.innerHTML = "";
+  if (!CAMP || CAMP.draft) return;
+  if (CAMP.battle){
+    const b = CAMP.battle, me = active();
+    if (b.mustSwitch){
+      CAMP.party.forEach((m,i)=>{ if (i!==CAMP.activeIdx && m.hp>0)
+        row.appendChild(actBtn(`GO ${m.name.toUpperCase()}`, ()=>doCmdBeat("switch", i+1), "primary silk")); });
+      return;
+    }
+    me.moves.forEach((mv,i)=>{
+      const e = eff(mv.type, b.foe.types);
+      const hint = e===0?"×0":e!==1?"×"+e:"";
+      const btn = actBtn(`<span class="mn">${cap(mv.name)}</span><span class="mi"><span>${mv.type} ${mv.power}</span><span>${hint}</span></span>`,
+                         ()=>doCmdBeat("move", i+1), "move");
+      btn.style.setProperty("--mv", TYPE_COLORS[mv.type]);
+      row.appendChild(btn);
+    });
+    CAMP.party.forEach((m,i)=>{ if (i!==CAMP.activeIdx && m.hp>0)
+      row.appendChild(actBtn(`↔ ${m.name}`, ()=>doCmdBeat("switch", i+1), "ghost")); });
+    if (b.kind==="wild"){
+      for (const ball of ["pokeball","greatball","ultraball"])
+        if (CAMP.trainer.balls[ball] > 0)
+          row.appendChild(actBtn(`● ${ball} ×${CAMP.trainer.balls[ball]}`, ()=>doCmdBeat("catch", ball)));
+      row.appendChild(actBtn("RUN", ()=>doCmdBeat("run"), "ghost silk"));
+    }
+    if (CAMP.trainer.potions > 0)
+      row.appendChild(actBtn(`+ potion ×${CAMP.trainer.potions}`, ()=>doCmdBeat("use","potion",CAMP.activeIdx+1), "ghost"));
+    return;
+  }
+  row.appendChild(actBtn("EXPLORE THE GRASS", ()=>doCmdBeat("encounter"), "primary silk"));
+  row.appendChild(actBtn("POKÉ CENTER", ()=>doCmdBeat("heal"), "ghost"));
+  for (const item of ["pokeball","potion"])
+    row.appendChild(actBtn(`buy ${item}`, ()=>doCmdBeat("buy", item, 1), "ghost"));
+}
+
+function renderAll(){ setAccent(); renderCardStrip(); renderStage(); renderActions(); }
+
+/* ---------------- flows ---------------- */
+
+function lockUI(v){ busy=v; $("#btn-row").style.pointerEvents=v?"none":"auto"; $("#btn-row").style.opacity=v?.55:1; }
+
+async function doCmdBeat(verb, ...args){
+  if (busy) return;
+  lockUI(true);
+  const hadBattle = !!CAMP?.battle;
+  const r = await cmd(verb, ...args);
+  drainBattleLog();
+  const battleEnded = hadBattle && !CAMP?.battle;
+  if (!hadBattle || battleEnded || !CAMP?.battle) drainOutputTail(r.output);
+  renderAll();
+  lockUI(false);
+  if (battleEnded){
+    const tail = String(r.output).split("\n").filter(l=>/^\s*> /.test(l)).map(l=>stripAnsi(l.replace(/^\s*> /,"")));
+    await gmBeat(null, [...tail, "The battle just ended — narrate the aftermath in the field."]);
+  }
+}
+
+async function pickStarter(i){
+  if (busy) return;
+  lockUI(true);
+  await cmd("pick", i+1);
+  renderAll(); lockUI(false);
+  taleEngine(`${active().name} joined the party.`, true);
+  await gmBeat(`I chose ${active().name} as my starter. Open the journey: where am I, what's the first hook? Travel me somewhere real and small with: node game.js go <location>.`, []);
+}
+
+async function sendSay(){
+  const inp = $("#say");
+  const text = inp.value.trim();
+  if (!text || busy) return;
+  inp.value = "";
+  talePlayer(text);
+  const m = text.match(/^go\s+(.+)$/i);
+  if (m){
+    const loc = m[1].toLowerCase().trim().replace(/\s+/g,"-");
+    const before = CAMP?.location;
+    const r = await cmd("go", loc);
+    if (CAMP?.location !== before){
+      taleEngine(`Arrived: ${CAMP.location}.`);
+      renderAll();
+      await gmBeat(`I traveled to ${CAMP.location}. Set the scene.`, [`arrived at ${CAMP.location}`]);
+    } else {
+      drainOutputTail(r.output);
+      taleEngine(`"${loc}" isn't a place PokeAPI knows.`);
+      await gmBeat(`I tried to go to "${loc}" but the engine rejected it. Offer 2-3 real nearby PokeAPI locations and, if obvious, just take me to the best fit with node game.js go <location>.`, []);
+    }
+    return;
+  }
+  await gmBeat(text, []);
+}
+
+/* ---------------- boot ---------------- */
+
+(async function boot(){
+  await refresh();
+  $("#gm-probe").textContent = FULL.gm?.available
+    ? "GM online — Claude Code found."
+    : "GM offline — Claude Code CLI not detected by the server. Engine-only mode.";
+  if (CAMP){ $("#resume").style.display = "inline-block"; $("#tn").value = CAMP.trainer?.name || ""; }
+
+  $("#begin").addEventListener("click", async ()=>{
+    const name = $("#tn").value.trim() || "Red";
+    $("#setup").style.display="none"; $("#app").style.visibility="visible";
+    taleEngine(`Journey started for ${name}.`);
+    await cmd("journey","new",name);
+    renderAll();
+  });
+  $("#resume").addEventListener("click", async ()=>{
+    $("#setup").style.display="none"; $("#app").style.visibility="visible";
+    await cmd("tick");
+    renderAll();
+    taleEngine(`Session ${CAMP.counters?.sessions}. Welcome back.`);
+    const due = conseqDue();
+    await gmBeat(`New session. Recap in two sentences where we stood, then continue.${due.length?" Consequences are due — open with them.":""}`, []);
+  });
+  $("#say-btn").addEventListener("click", sendSay);
+  $("#say").addEventListener("keydown", e=>{ if (e.key==="Enter") sendSay(); });
+})();
+</script>
+</body>
+</html>
